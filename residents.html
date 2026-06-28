@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Residents — ResidentHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 14V6.5L8 2l6 4.5V14"/><path d="M6 14v-4h4v4"/></svg>
+      </div>
+      <span class="brand-name">ResidentHub</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group">
+        <a href="index.html" class="nav-item">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/></svg>
+          Overview
+        </a>
+        <a href="residents.html" class="nav-item active">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2-5 5-5"/><circle cx="12" cy="9" r="2.5"/><path d="M9.5 14c0-2 1-3 2.5-3s2.5 1 2.5 3"/></svg>
+          Residents
+        </a>
+        <a href="rooms.html" class="nav-item">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 14V6l6-4 6 4v8"/><path d="M6 14v-4h4v4"/></svg>
+          Rooms
+        </a>
+        <a href="maintenance.html" class="nav-item">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3.5a3 3 0 0 1-4 4L2 11a2 2 0 1 0 3 3l3.5-3.5a3 3 0 0 1 4-4l-2 2 1.5 1.5 2-2z"/></svg>
+          Maintenance
+        </a>
+        <a href="announcements.html" class="nav-item">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9H2a2 2 0 0 1 2-2V5a4 4 0 0 1 8 0v2a2 2 0 0 1 2 2z"/><path d="M6.5 12.5a1.5 1.5 0 0 0 3 0"/></svg>
+          Announcements
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">AM</div>
+        <div>
+          <div class="user-info-name">Admin Manager</div>
+          <div class="user-info-role">Property Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title">Residents</span>
+      <div class="topbar-sep"></div>
+      <span class="topbar-crumb">Manage all residents</span>
+      <div class="topbar-search">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4.5"/><path d="M11 11l2.5 2.5"/></svg>
+        <input type="text" placeholder="Search…" />
+      </div>
+      <div class="topbar-actions">
+        <div class="topbar-avatar">AM</div>
+      </div>
+    </header>
+
+    <div class="page">
+      <div class="page-inner">
+
+        <div class="page-head">
+          <div class="page-head-left">
+            <h1>Residents</h1>
+            <p id="res-count-label">Loading…</p>
+          </div>
+          <button class="btn btn-primary" id="btn-add-resident">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg>
+            Add Resident
+          </button>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="search-input-wrap">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4.5"/><path d="M11 11l2.5 2.5"/></svg>
+            <input type="text" placeholder="Search by name, email, room…" id="search-residents" />
+          </div>
+          <select class="filter-select" id="filter-room">
+            <option value="">All Rooms</option>
+          </select>
+          <select class="filter-select" id="sort-residents">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="az">Name A–Z</option>
+            <option value="za">Name Z–A</option>
+          </select>
+          <div class="toolbar-spacer"></div>
+          <span style="font-size:11px;color:var(--text-3);" id="res-showing-label"></span>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Resident</th>
+                <th>Contact</th>
+                <th>Room</th>
+                <th>Move-in</th>
+                <th>Room status</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="residents-tbody">
+              <tr><td colspan="6"><div class="empty" style="padding:var(--s8)"><p>Loading…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Add / Edit Resident Modal ─────────────────────── -->
+<div class="modal-overlay" id="resident-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="res-modal-title">Add Resident</span>
+      <button class="modal-close" data-close-modal>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4L4 12M4 4l8 8"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="resident-form" novalidate>
+        <input type="hidden" id="resident-id" />
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="res-name">Full name <span class="req">*</span></label>
+            <input type="text" class="form-input" id="res-name" placeholder="Jane Smith" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="res-phone">Phone <span class="req">*</span></label>
+            <input type="tel" class="form-input" id="res-phone" placeholder="555-0100" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="res-email">Email address <span class="req">*</span></label>
+          <input type="email" class="form-input" id="res-email" placeholder="jane@example.com" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="res-room">Assign room <span class="req">*</span></label>
+            <select class="form-select" id="res-room">
+              <option value="">Select a room…</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="res-movein">Move-in date <span class="req">*</span></label>
+            <input type="date" class="form-input" id="res-movein" />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancel</button>
+      <button class="btn btn-primary" id="btn-save-resident">Save resident</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+<script src="js/storage.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/residents.js"></script>
+</body>
+</html>
