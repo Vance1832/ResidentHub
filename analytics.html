@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics — ResidentHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 14V6.5L8 2l6 4.5V14"/><path d="M6 14v-4h4v4"/></svg>
+      </div>
+      <span class="brand-name">ResidentHub</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group">
+        <a href="index.html" class="nav-item">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/></svg>
+          Overview
+        </a>
+        <a href="residents.html" class="nav-item">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2-5 5-5"/><circle cx="12" cy="9" r="2.5"/><path d="M9.5 14c0-2 1-3 2.5-3s2.5 1 2.5 3"/></svg>
+          Residents
+        </a>
+        <a href="rooms.html" class="nav-item">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 14V6l6-4 6 4v8"/><path d="M6 14v-4h4v4"/></svg>
+          Rooms
+        </a>
+        <a href="maintenance.html" class="nav-item">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3.5a3 3 0 0 1-4 4L2 11a2 2 0 1 0 3 3l3.5-3.5a3 3 0 0 1 4-4l-2 2 1.5 1.5 2-2z"/></svg>
+          Maintenance
+        </a>
+        <a href="announcements.html" class="nav-item">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9H2a2 2 0 0 1 2-2V5a4 4 0 0 1 8 0v2a2 2 0 0 1 2 2z"/><path d="M6.5 12.5a1.5 1.5 0 0 0 3 0"/></svg>
+          Announcements
+        </a>
+        <a href="analytics.html" class="nav-item active">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 11 5 7 9 10 15 4"/><polyline points="11 4 15 4 15 8"/></svg>
+          Analytics
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">AM</div>
+        <div>
+          <div class="user-info-name">Admin Manager</div>
+          <div class="user-info-role">Property Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title">Analytics</span>
+      <div class="topbar-sep"></div>
+      <span class="topbar-crumb">Property performance overview</span>
+      <div class="topbar-actions" style="margin-left:auto;">
+        <div class="topbar-avatar">AM</div>
+      </div>
+    </header>
+
+    <div class="page">
+      <div class="page-inner">
+
+        <div class="page-head" style="margin-bottom:var(--s5);">
+          <div class="page-head-left">
+            <h1>Analytics</h1>
+            <p>Revenue, occupancy, and maintenance insights — computed from live data using Array methods.</p>
+          </div>
+        </div>
+
+        <!-- Summary KPI cards -->
+        <div class="analytics-summary-grid" id="analytics-summary">
+          <!-- Rendered by analytics.js — renderSummaryCards() -->
+        </div>
+
+        <!-- Two-column charts grid -->
+        <div class="analytics-grid">
+
+          <!-- Left column -->
+          <div style="display:flex;flex-direction:column;gap:var(--s4);">
+
+            <!-- Revenue by room type -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">Revenue by Room Type</div>
+                  <div class="panel-subtitle">Actual vs. potential monthly revenue · grouped with Array.reduce()</div>
+                </div>
+              </div>
+              <div style="padding:var(--s4) var(--s5);">
+                <div id="chart-revenue-type">
+                  <div class="empty" style="padding:var(--s6)"><p>Loading…</p></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resident tenure -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">Resident Tenure</div>
+                  <div class="panel-subtitle">Lease duration per resident · sorted with Array.sort()</div>
+                </div>
+              </div>
+              <div style="padding:var(--s4) var(--s5);" id="analytics-residents">
+                <div class="empty" style="padding:var(--s6)"><p>Loading…</p></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right column -->
+          <div style="display:flex;flex-direction:column;gap:var(--s4);">
+
+            <!-- Maintenance by category -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">Maintenance by Category</div>
+                  <div class="panel-subtitle">Grouped with Array.reduce()</div>
+                </div>
+              </div>
+              <div style="padding:var(--s4) var(--s5);">
+                <div id="chart-maint-category"></div>
+              </div>
+            </div>
+
+            <!-- Maintenance by priority -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">Maintenance by Priority</div>
+                  <div class="panel-subtitle">Grouped with Array.reduce()</div>
+                </div>
+              </div>
+              <div style="padding:var(--s4) var(--s5);">
+                <div id="chart-maint-priority"></div>
+              </div>
+            </div>
+
+            <!-- Room rent ranking -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">Room Rent Ranking</div>
+                  <div class="panel-subtitle">Sorted with Array.sort() — highest first</div>
+                </div>
+              </div>
+              <div class="table-wrap" style="border:none;border-radius:0;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Room</th>
+                      <th>Type</th>
+                      <th>Rent</th>
+                      <th>Status</th>
+                      <th>Tenant</th>
+                    </tr>
+                  </thead>
+                  <tbody id="room-rent-tbody">
+                    <tr><td colspan="5"><div class="empty" style="padding:var(--s6)"><p>Loading…</p></div></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </div><!-- /.analytics-grid -->
+
+        <!-- JS Concepts reference card -->
+        <div class="panel" style="margin-top:var(--s4);">
+          <div class="panel-header">
+            <div class="panel-title">JS Concepts in This Page</div>
+            <div class="panel-subtitle">Every calculation on this page maps to a course chapter</div>
+          </div>
+          <div class="concepts-grid">
+            <div class="concept-item">
+              <div class="concept-ch">Ch5</div>
+              <div class="concept-desc"><strong>Array.reduce()</strong> — groups rooms by type, sums revenue, averages lease days</div>
+            </div>
+            <div class="concept-item">
+              <div class="concept-ch">Ch5</div>
+              <div class="concept-desc"><strong>Array.map()</strong> — transforms resident objects to add computed <code>leaseDays</code></div>
+            </div>
+            <div class="concept-item">
+              <div class="concept-ch">Ch5</div>
+              <div class="concept-desc"><strong>Array.filter()</strong> — counts completed maintenance, occupied rooms</div>
+            </div>
+            <div class="concept-item">
+              <div class="concept-ch">Ch5</div>
+              <div class="concept-desc"><strong>Array.sort()</strong> — ranks rooms by rent, residents by tenure</div>
+            </div>
+            <div class="concept-item">
+              <div class="concept-ch">Ch5</div>
+              <div class="concept-desc"><strong>Object.entries()</strong> — iterates grouped data from reduce()</div>
+            </div>
+            <div class="concept-item">
+              <div class="concept-ch">Ch7</div>
+              <div class="concept-desc"><strong>OOP class methods</strong> — getTotalRevenue(), getRevenueByType(), getAverageLeaseDays()</div>
+            </div>
+            <div class="concept-item">
+              <div class="concept-ch">Ch3</div>
+              <div class="concept-desc"><strong>Arithmetic operators</strong> — ÷ for percentages, × for projections, − for date math</div>
+            </div>
+            <div class="concept-item">
+              <div class="concept-ch">Ch6</div>
+              <div class="concept-desc"><strong>for...of loop</strong> — builds DOM chart rows and table rows iteratively</div>
+            </div>
+            <div class="concept-item">
+              <div class="concept-ch">DOM</div>
+              <div class="concept-desc"><strong>createElement / appendChild</strong> — chart bars built entirely without innerHTML</div>
+            </div>
+            <div class="concept-item">
+              <div class="concept-ch">Ch4</div>
+              <div class="concept-desc"><strong>Reusable function</strong> — buildBarChart() used for both category and priority charts</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.page-inner -->
+    </div><!-- /.page -->
+  </div><!-- /.main -->
+</div><!-- /.app-shell -->
+
+<div id="toast-root"></div>
+<script src="js/storage.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/analytics.js"></script>
+</body>
+</html>

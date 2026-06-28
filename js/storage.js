@@ -1,323 +1,293 @@
 /* ============================================================
-   storage.js – Local Storage abstraction layer
-   Provides get / set / update / delete helpers for each
-   data collection: residents, rooms, maintenance, announcements,
-   and activities.
+   storage.js – Data persistence layer
+
+   JS Concepts demonstrated:
+   ✦ Ch7 OOP      — class, constructor, extends, super, this
+   ✦ Ch5 Array    — reduce, filter, map, find, push, slice
+   ✦ Ch5 Object   — spread operator, object accumulator pattern
+   ✦ Ch4 Functions — methods, default params, arrow functions
+   ✦ Ch3 Operators — arithmetic, comparison, compound assignment
+   ✦ Ch2 Data Types — String key, Number rent, Boolean status
+   ✦ Ch6 Control   — if guard clauses, for...of loops
    ============================================================ */
 
-const KEYS = {
-  residents:     'rh_residents',
-  rooms:         'rh_rooms',
-  maintenance:   'rh_maintenance',
-  announcements: 'rh_announcements',
-  activities:    'rh_activities',
-};
-
-// ── Generic Helpers ──────────────────────────────────────────
-
-/**
- * Read an array from localStorage. Returns [] if key is missing.
- * @param {string} key
- * @returns {Array}
- */
-function storageGet(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    console.warn('storageGet error', key, e);
-    return [];
-  }
-}
-
-/**
- * Write an array to localStorage.
- * @param {string} key
- * @param {Array} data
- */
-function storageSet(key, data) {
-  try {
-    localStorage.setItem(key, JSON.stringify(data));
-  } catch (e) {
-    console.error('storageSet error', key, e);
-  }
-}
-
-// ── ID Generator ─────────────────────────────────────────────
-
-/**
- * Generate a simple unique ID (timestamp + random suffix).
- * @returns {string}
- */
+// Ch4: Named function — generates a unique short ID
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
-// ── Residents ────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────
+   Ch7 OOP: Base class — common CRUD shared by all storage types
+───────────────────────────────────────────────────────────── */
+class BaseStorage {
+  // Ch7: constructor runs when 'new' is called
+  constructor(storageKey) {
+    this._key = storageKey;   // Ch2: String, Ch7: 'this' binds to the instance
+  }
 
-const ResidentStorage = {
+  _load() {
+    try {
+      return JSON.parse(localStorage.getItem(this._key) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  _save(data) {
+    localStorage.setItem(this._key, JSON.stringify(data));
+  }
+
   getAll() {
-    return storageGet(KEYS.residents);
-  },
+    return this._load();
+  }
 
+  // Ch5: Array.find() — returns first matching element or null
   getById(id) {
-    return this.getAll().find(r => r.id === id) || null;
-  },
+    return this._load().find(item => item.id === id) || null;
+  }
 
-  add(residentData) {
-    const residents = this.getAll();
-    const newResident = {
-      id:        generateId(),
+  // Ch5: Object spread — merges generated fields with provided data
+  add(data) {
+    const items = this._load();
+    const item = {
+      id: generateId(),
       createdAt: new Date().toISOString(),
-      ...residentData,
+      ...data         // Ch5: spread copies all properties from data object
     };
-    residents.push(newResident);
-    storageSet(KEYS.residents, residents);
-    return newResident;
-  },
+    items.push(item); // Ch5: Array.push()
+    this._save(items);
+    return item;
+  }
 
-  update(id, updates) {
-    const residents = this.getAll();
-    const index = residents.findIndex(r => r.id === id);
-    if (index === -1) return null;
-    residents[index] = { ...residents[index], ...updates, updatedAt: new Date().toISOString() };
-    storageSet(KEYS.residents, residents);
-    return residents[index];
-  },
-
-  delete(id) {
-    const residents = this.getAll().filter(r => r.id !== id);
-    storageSet(KEYS.residents, residents);
-  },
-
-  search(query) {
-    const q = query.toLowerCase();
-    return this.getAll().filter(r =>
-      r.name.toLowerCase().includes(q) ||
-      r.email.toLowerCase().includes(q) ||
-      r.phone.toLowerCase().includes(q) ||
-      r.roomNumber.toLowerCase().includes(q)
+  // Ch5: Array.map() — returns new array with the updated item
+  update(id, data) {
+    const items = this._load().map(item =>
+      item.id === id ? { ...item, ...data } : item
     );
-  },
-};
+    this._save(items);
+  }
 
-// ── Rooms ────────────────────────────────────────────────────
+  // Ch5: Array.filter() — keeps everything except the deleted item
+  delete(id) {
+    this._save(this._load().filter(item => item.id !== id));
+  }
 
-const RoomStorage = {
-  getAll() {
-    return storageGet(KEYS.rooms);
-  },
+  count() {
+    return this._load().length;   // Ch2: Number type
+  }
+}
 
-  getById(id) {
-    return this.getAll().find(r => r.id === id) || null;
-  },
+/* ─────────────────────────────────────────────────────────────
+   Ch7 OOP: ResidentStorage — inherits from BaseStorage
+───────────────────────────────────────────────────────────── */
+class ResidentStorageClass extends BaseStorage {
+  constructor() {
+    super('rh_residents');  // Ch7: super() calls parent constructor
+  }
 
-  getByNumber(roomNumber) {
-    return this.getAll().find(r => r.roomNumber === roomNumber) || null;
-  },
+  getByRoom(roomNumber) {
+    return this.getAll().filter(r => r.roomNumber === roomNumber);
+  }
 
-  add(roomData) {
+  // Ch3: Date arithmetic — calculate days between two dates
+  // Ch2: Returns a Number (days as integer)
+  getLeaseDays(resident) {
+    const moveIn    = new Date(resident.moveInDate);
+    const today     = new Date();
+    const msPerDay  = 1000 * 60 * 60 * 24;   // Ch3: arithmetic operators
+    return Math.floor((today - moveIn) / msPerDay);
+  }
+
+  // Ch5: Array.reduce() + Ch3: division — average lease duration
+  getAverageLeaseDays() {
+    const residents = this.getAll();
+    if (!residents.length) return 0;
+    const total = residents.reduce(
+      (sum, r) => sum + this.getLeaseDays(r), 0
+    );
+    return Math.round(total / residents.length);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Ch7 OOP: RoomStorage — inherits from BaseStorage
+───────────────────────────────────────────────────────────── */
+class RoomStorageClass extends BaseStorage {
+  constructor() {
+    super('rh_rooms');
+  }
+
+  getByNumber(num) {
+    return this.getAll().find(r => r.roomNumber === num) || null;
+  }
+
+  getOccupied()  { return this.getAll().filter(r => r.status === 'occupied');  }
+  getAvailable() { return this.getAll().filter(r => r.status === 'available'); }
+
+  // Ch5: Array.reduce() — sum rent across occupied rooms
+  getTotalRevenue() {
+    return this.getOccupied().reduce((sum, r) => sum + (r.monthlyRent || 0), 0);
+  }
+
+  getPotentialRevenue() {
+    return this.getAll().reduce((sum, r) => sum + (r.monthlyRent || 0), 0);
+  }
+
+  getAverageRent() {
     const rooms = this.getAll();
-    const newRoom = {
-      id:        generateId(),
-      createdAt: new Date().toISOString(),
-      ...roomData,
-    };
-    rooms.push(newRoom);
-    storageSet(KEYS.rooms, rooms);
-    return newRoom;
-  },
+    if (!rooms.length) return 0;
+    return Math.round(
+      rooms.reduce((sum, r) => sum + (r.monthlyRent || 0), 0) / rooms.length
+    );
+  }
 
-  update(id, updates) {
-    const rooms = this.getAll();
-    const index = rooms.findIndex(r => r.id === id);
-    if (index === -1) return null;
-    rooms[index] = { ...rooms[index], ...updates, updatedAt: new Date().toISOString() };
-    storageSet(KEYS.rooms, rooms);
-    return rooms[index];
-  },
+  // Ch5: Array.reduce() with Object accumulator — "groupBy" pattern
+  // Groups rooms by type and aggregates count + revenue data
+  getRevenueByType() {
+    return this.getAll().reduce((acc, room) => {
+      const type = room.type || 'Unknown';
+      if (!acc[type]) {
+        acc[type] = { count: 0, occupied: 0, revenue: 0, potential: 0 };
+      }
+      acc[type].count++;
+      acc[type].potential += room.monthlyRent || 0;
+      if (room.status === 'occupied') {
+        acc[type].occupied++;
+        acc[type].revenue += room.monthlyRent || 0;  // Ch3: += compound assignment
+      }
+      return acc;   // Ch5: must return accumulator
+    }, {});         // {} is the initial accumulator value
+  }
+}
 
-  delete(id) {
-    const rooms = this.getAll().filter(r => r.id !== id);
-    storageSet(KEYS.rooms, rooms);
-  },
+/* ─────────────────────────────────────────────────────────────
+   Ch7 OOP: MaintenanceStorage — inherits from BaseStorage
+───────────────────────────────────────────────────────────── */
+class MaintenanceStorageClass extends BaseStorage {
+  constructor() {
+    super('rh_maintenance');
+  }
 
-  getAvailable() {
-    return this.getAll().filter(r => r.status === 'available');
-  },
+  getPending()    { return this.getAll().filter(m => m.status === 'pending');     }
+  getInProgress() { return this.getAll().filter(m => m.status === 'in-progress'); }
+  getCompleted()  { return this.getAll().filter(m => m.status === 'completed');   }
 
-  getOccupied() {
-    return this.getAll().filter(r => r.status === 'occupied');
-  },
-};
+  // Ch5: reduce — produces { Plumbing: 2, HVAC: 1, ... }
+  getByCategory() {
+    return this.getAll().reduce((acc, m) => {
+      acc[m.category] = (acc[m.category] || 0) + 1;
+      return acc;
+    }, {});
+  }
 
-// ── Maintenance ──────────────────────────────────────────────
+  getByPriority() {
+    return this.getAll().reduce((acc, m) => {
+      acc[m.priority] = (acc[m.priority] || 0) + 1;
+      return acc;
+    }, {});
+  }
+}
 
-const MaintenanceStorage = {
+/* ─────────────────────────────────────────────────────────────
+   Ch7 OOP: AnnouncementStorage — inherits from BaseStorage
+───────────────────────────────────────────────────────────── */
+class AnnouncementStorageClass extends BaseStorage {
+  constructor() {
+    super('rh_announcements');
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Ch7 OOP: ActivityStorage — standalone append-only log
+───────────────────────────────────────────────────────────── */
+class ActivityStorageClass {
+  constructor() {
+    this._key = 'rh_activity';
+  }
+
   getAll() {
-    return storageGet(KEYS.maintenance);
-  },
+    try {
+      return JSON.parse(localStorage.getItem(this._key) || '[]');
+    } catch {
+      return [];
+    }
+  }
 
-  getById(id) {
-    return this.getAll().find(m => m.id === id) || null;
-  },
+  // Ch4: Default parameter — color = 'gray' if not provided
+  add(type, text, color = 'gray') {
+    const items = this.getAll();
+    items.unshift({ id: generateId(), type, text, color, timestamp: new Date().toISOString() });
+    localStorage.setItem(this._key, JSON.stringify(items.slice(0, 50)));
+  }
+}
 
-  add(data) {
-    const list = this.getAll();
-    const newItem = {
-      id:        generateId(),
-      status:    'pending',
-      createdAt: new Date().toISOString(),
-      ...data,
-    };
-    list.push(newItem);
-    storageSet(KEYS.maintenance, list);
-    return newItem;
-  },
+/* ─────────────────────────────────────────────────────────────
+   Ch7: Singleton pattern — one shared instance per storage type
+───────────────────────────────────────────────────────────── */
+const ResidentStorage     = new ResidentStorageClass();
+const RoomStorage         = new RoomStorageClass();
+const MaintenanceStorage  = new MaintenanceStorageClass();
+const AnnouncementStorage = new AnnouncementStorageClass();
+const ActivityStorage     = new ActivityStorageClass();
 
-  update(id, updates) {
-    const list = this.getAll();
-    const index = list.findIndex(m => m.id === id);
-    if (index === -1) return null;
-    list[index] = { ...list[index], ...updates, updatedAt: new Date().toISOString() };
-    storageSet(KEYS.maintenance, list);
-    return list[index];
-  },
-
-  delete(id) {
-    const list = this.getAll().filter(m => m.id !== id);
-    storageSet(KEYS.maintenance, list);
-  },
-
-  getPending() {
-    return this.getAll().filter(m => m.status === 'pending');
-  },
-};
-
-// ── Announcements ────────────────────────────────────────────
-
-const AnnouncementStorage = {
-  getAll() {
-    return storageGet(KEYS.announcements);
-  },
-
-  getById(id) {
-    return this.getAll().find(a => a.id === id) || null;
-  },
-
-  add(data) {
-    const list = this.getAll();
-    const newItem = {
-      id:        generateId(),
-      createdAt: new Date().toISOString(),
-      ...data,
-    };
-    list.push(newItem);
-    storageSet(KEYS.announcements, list);
-    return newItem;
-  },
-
-  update(id, updates) {
-    const list = this.getAll();
-    const index = list.findIndex(a => a.id === id);
-    if (index === -1) return null;
-    list[index] = { ...list[index], ...updates, updatedAt: new Date().toISOString() };
-    storageSet(KEYS.announcements, list);
-    return list[index];
-  },
-
-  delete(id) {
-    const list = this.getAll().filter(a => a.id !== id);
-    storageSet(KEYS.announcements, list);
-  },
-};
-
-// ── Activity Log ─────────────────────────────────────────────
-
-const ActivityStorage = {
-  getAll() {
-    return storageGet(KEYS.activities);
-  },
-
-  /**
-   * Add an activity entry and keep only the 50 most recent.
-   * @param {string} type  - 'resident' | 'room' | 'maintenance' | 'announcement'
-   * @param {string} text  - Human-readable description
-   * @param {string} color - dot color class
-   */
-  add(type, text, color = 'blue') {
-    const list = this.getAll();
-    list.unshift({
-      id:        generateId(),
-      type,
-      text,
-      color,
-      timestamp: new Date().toISOString(),
-    });
-    // Keep only last 50
-    const trimmed = list.slice(0, 50);
-    storageSet(KEYS.activities, trimmed);
-    return trimmed[0];
-  },
-
-  clear() {
-    storageSet(KEYS.activities, []);
-  },
-};
-
-// ── Seed Demo Data ───────────────────────────────────────────
-
-/**
- * Populate localStorage with demo data if it's empty.
- * Called once from app.js on first load.
- */
+/* ─────────────────────────────────────────────────────────────
+   Demo data seeder
+   Ch5: Arrays of objects as data source
+   Ch6: for...of loops to iterate and insert each item
+───────────────────────────────────────────────────────────── */
 function seedDemoData() {
-  const rooms = RoomStorage.getAll();
-  if (rooms.length > 0) return; // already seeded
+  if (RoomStorage.count() > 0) return;   // Ch6: guard clause
 
-  // Seed Rooms
-  const demoRooms = [
-    { roomNumber: '101', floor: '1', type: 'Studio',    monthlyRent: 650,  status: 'occupied'  },
-    { roomNumber: '102', floor: '1', type: 'Studio',    monthlyRent: 650,  status: 'available' },
-    { roomNumber: '201', floor: '2', type: '1 Bedroom', monthlyRent: 900,  status: 'occupied'  },
-    { roomNumber: '202', floor: '2', type: '1 Bedroom', monthlyRent: 900,  status: 'occupied'  },
-    { roomNumber: '203', floor: '2', type: '1 Bedroom', monthlyRent: 900,  status: 'available' },
-    { roomNumber: '301', floor: '3', type: '2 Bedroom', monthlyRent: 1200, status: 'occupied'  },
-    { roomNumber: '302', floor: '3', type: '2 Bedroom', monthlyRent: 1200, status: 'available' },
-    { roomNumber: '401', floor: '4', type: 'Penthouse', monthlyRent: 1800, status: 'occupied'  },
+  // Ch5: Array of objects — typed demo data (Ch2: mixed types)
+  const rooms = [
+    { roomNumber: '101', floor: '1', type: 'Studio',    monthlyRent: 850,  status: 'occupied'  },
+    { roomNumber: '102', floor: '1', type: '1 Bedroom', monthlyRent: 1100, status: 'occupied'  },
+    { roomNumber: '103', floor: '1', type: '1 Bedroom', monthlyRent: 1050, status: 'available' },
+    { roomNumber: '201', floor: '2', type: '2 Bedroom', monthlyRent: 1600, status: 'occupied'  },
+    { roomNumber: '202', floor: '2', type: '2 Bedroom', monthlyRent: 1550, status: 'available' },
+    { roomNumber: '203', floor: '2', type: 'Studio',    monthlyRent: 900,  status: 'occupied'  },
+    { roomNumber: '301', floor: '3', type: 'Penthouse', monthlyRent: 2800, status: 'available' },
+    { roomNumber: '302', floor: '3', type: '1 Bedroom', monthlyRent: 1200, status: 'occupied'  },
   ];
-  demoRooms.forEach(r => RoomStorage.add(r));
 
-  // Seed Residents
-  const demoResidents = [
-    { name: 'Alice Johnson',  phone: '555-0101', email: 'alice@example.com',  roomNumber: '101', moveInDate: '2024-01-15' },
-    { name: 'Bob Martinez',   phone: '555-0102', email: 'bob@example.com',    roomNumber: '201', moveInDate: '2024-03-01' },
-    { name: 'Carol Williams', phone: '555-0103', email: 'carol@example.com',  roomNumber: '202', moveInDate: '2023-11-20' },
-    { name: 'David Kim',      phone: '555-0104', email: 'david@example.com',  roomNumber: '301', moveInDate: '2024-05-10' },
-    { name: 'Emma Davis',     phone: '555-0105', email: 'emma@example.com',   roomNumber: '401', moveInDate: '2024-06-01' },
+  for (const room of rooms) { RoomStorage.add(room); }   // Ch6: for...of
+
+  const residents = [
+    { name: 'Alice Johnson',  email: 'alice@example.com',  phone: '555-0101', roomNumber: '101', moveInDate: '2023-03-15' },
+    { name: 'Bob Martinez',   email: 'bob@example.com',    phone: '555-0102', roomNumber: '102', moveInDate: '2023-07-01' },
+    { name: 'Carol Williams', email: 'carol@example.com',  phone: '555-0103', roomNumber: '201', moveInDate: '2022-11-20' },
+    { name: 'David Chen',     email: 'david@example.com',  phone: '555-0104', roomNumber: '203', moveInDate: '2024-01-10' },
+    { name: 'Eva Nguyen',     email: 'eva@example.com',    phone: '555-0105', roomNumber: '302', moveInDate: '2023-09-05' },
   ];
-  demoResidents.forEach(r => ResidentStorage.add(r));
 
-  // Seed Maintenance
-  const demoMaintenance = [
-    { residentName: 'Alice Johnson',  roomNumber: '101', category: 'Plumbing',    priority: 'high',   description: 'Leaking faucet in bathroom.',     status: 'pending'     },
-    { residentName: 'Bob Martinez',   roomNumber: '201', category: 'Electrical',  priority: 'medium', description: 'Broken light fixture in living room.', status: 'in-progress' },
-    { residentName: 'Carol Williams', roomNumber: '202', category: 'HVAC',        priority: 'low',    description: 'AC unit making unusual noise.',    status: 'completed'   },
-    { residentName: 'David Kim',      roomNumber: '301', category: 'Appliance',   priority: 'medium', description: 'Dishwasher not draining properly.', status: 'pending'    },
+  for (const resident of residents) { ResidentStorage.add(resident); }
+
+  const maintenance = [
+    { residentName: 'Alice Johnson',  roomNumber: '101', category: 'Plumbing',   priority: 'high',   description: 'Leaking pipe under kitchen sink.',  status: 'pending'     },
+    { residentName: 'Bob Martinez',   roomNumber: '102', category: 'Electrical', priority: 'medium', description: 'Bathroom outlet not working.',      status: 'in-progress' },
+    { residentName: 'Carol Williams', roomNumber: '201', category: 'HVAC',       priority: 'low',    description: 'AC unit making unusual noise.',     status: 'completed'   },
+    { residentName: 'David Chen',     roomNumber: '203', category: 'Appliance',  priority: 'medium', description: 'Refrigerator not cooling.',         status: 'pending'     },
   ];
-  demoMaintenance.forEach(m => MaintenanceStorage.add(m));
 
-  // Seed Announcements
-  const demoAnnouncements = [
-    { title: 'Water Shutdown – July 5th',       description: 'Scheduled maintenance will require a water shutdown from 9 AM to 1 PM on July 5th. Please plan accordingly.',  date: '2025-07-01' },
-    { title: 'Parking Lot Resurfacing',         description: 'The east parking lot will be closed for resurfacing from July 10–12. Please use the west lot during this period.', date: '2025-06-28' },
-    { title: 'Community BBQ – Saturday',        description: 'Join us for our annual resident barbecue this Saturday at 4 PM in the courtyard. Food and drinks provided!',         date: '2025-06-25' },
+  for (const req of maintenance) { MaintenanceStorage.add(req); }
+
+  const announcements = [
+    { title: 'Scheduled Water Shutoff', date: '2024-02-10', description: 'Water will be shut off on Feb 10 from 9 AM–12 PM for plumbing repairs in the east wing.' },
+    { title: 'Community BBQ Event',     date: '2024-02-18', description: 'Join us for a community BBQ on the rooftop terrace. Food and drinks provided for all residents.' },
+    { title: 'Parking Lot Repaving',    date: '2024-02-25', description: 'The east parking lot will be closed Feb 25–26 for resurfacing. Please use west lot.' },
   ];
-  demoAnnouncements.forEach(a => AnnouncementStorage.add(a));
 
-  // Seed Activity
-  ActivityStorage.add('resident',     '<strong>Alice Johnson</strong> moved into Room 101', 'blue');
-  ActivityStorage.add('announcement', 'Announcement posted: <strong>Water Shutdown</strong>', 'orange');
-  ActivityStorage.add('maintenance',  'Maintenance request submitted by <strong>Bob Martinez</strong>', 'red');
-  ActivityStorage.add('room',         'Room <strong>302</strong> marked as available', 'green');
+  for (const ann of announcements) { AnnouncementStorage.add(ann); }
+
+  // Ch6: for loop with index — seed in reverse so newest appears at top
+  const activities = [
+    { type: 'resident',     text: '<strong>Eva Nguyen</strong> added to Room 302',                                          color: 'blue'  },
+    { type: 'maintenance',  text: 'HVAC request by <strong>Carol Williams</strong> → <strong>Completed</strong>',           color: 'green' },
+    { type: 'maintenance',  text: '<strong>Medium</strong> priority request from <strong>Bob Martinez</strong> (Electrical)', color: 'amber' },
+    { type: 'announcement', text: 'Announcement posted: <strong>Parking Lot Repaving</strong>',                             color: 'amber' },
+  ];
+
+  for (let i = activities.length - 1; i >= 0; i--) {
+    ActivityStorage.add(activities[i].type, activities[i].text, activities[i].color);
+  }
 }

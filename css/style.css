@@ -766,6 +766,24 @@ th.sortable:hover { color: var(--text-2); }
 .metric-sub .up   { color: var(--green); }
 .metric-sub .down { color: var(--red); }
 
+/* Metric value medium size (for currency) */
+.metric-value-md {
+  font-size: 18px;
+}
+
+/* Lease duration badge */
+.lease-duration-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Responsive */
 @media (max-width: 960px) {
   .sidebar { transform: translateX(-100%); }
